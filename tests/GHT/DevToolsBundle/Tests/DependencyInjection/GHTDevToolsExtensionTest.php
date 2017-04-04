@@ -4,6 +4,7 @@ namespace GHT\DevToolsBundle\Tests\DependencyInjection;
 
 use GHT\DevToolsBundle\DependencyInjection\GHTDevToolsExtension;
 use Matthias\SymfonyDependencyInjectionTest\PhpUnit\AbstractExtensionTestCase;
+use Symfony\Component\Config\Definition\Exception\InvalidConfigurationException;
 
 /**
  * Exercises the dependency injection on a compiler pass of the
@@ -38,22 +39,44 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
     }
 
     /**
-     * Verify that the API method map is loaded.
+     * Verify that the API method fails to load without minimum requirements.
      */
-    public function testParametersContainApiMethodMap()
+    public function testParametersContainApiMethodMapMissingRequiredConfigs()
     {
-        $this->load();
+        $this->expectException(InvalidConfigurationException::class);
+        $this->expectExceptionMessage('The child node "bundle" at path "d_tools" must be configured.');
 
-        $this->assertContainerBuilderHasParameter('d_tools.some.parameter', array('some' => 'value'));
+        $this->load();
     }
 
     /**
-     * Verify that the service is loaded.
+     * Verify that the API method map is loaded.
      */
-    public function testDevToolsServiceIsLoaded()
+    public function testParametersContainApiMethodMapWithRequiredConfigs()
     {
-        $this->load();
+        $this->load(array(
+            'bundle' => 'GHTDevToolsBundle',
+        ));
 
-        $this->assertContainerBuilderHasService('ght_mojang_api_client', 'GHT\MojangApiClientBundle\Service\GHTMojangApiClientService');
+        $this->assertContainerBuilderHasParameter('d_tools.bundle', 'GHTDevToolsBundle');
+
+        $this->assertContainerBuilderHasParameter(
+            'd_tools.doctrine_generate_entities',
+            array('defaults' => array('no_backup' => false))
+        );
+
+        $this->assertContainerBuilderHasParameter(
+            'd_tools.translation_update',
+            array('defaults' => array(
+                'clean' => false,
+                'domain' => 'messages',
+                'locales' => array('en'),
+                'mode' => 'force',
+                'no_backup' => false,
+                'no_prefix' => false,
+                'output_format' => 'xlf',
+                'prefix' => '__',
+            ))
+        );
     }
 }

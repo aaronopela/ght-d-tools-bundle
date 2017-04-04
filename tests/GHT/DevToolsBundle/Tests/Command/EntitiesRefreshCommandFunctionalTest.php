@@ -2,11 +2,11 @@
 
 namespace GHT\DevToolsBundle\Tests\Command;
 
-use GHT\DevToolsBundle\Command\RefreshTransCommand;
+use Doctrine\Bundle\DoctrineBundle\Command\GenerateEntitiesDoctrineCommand;
+use GHT\DevToolsBundle\Command\EntitiesRefreshCommand;
 use GHT\DevToolsBundle\Tests\DevToolsCommandFunctionalTestCase;
-use Symfony\Bundle\FrameworkBundle\Command\TranslationUpdateCommand;
 
-class RefreshTransCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
+class EntitiesRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
 {
     /**
      * {@inheritDoc}
@@ -16,11 +16,11 @@ class RefreshTransCommandFunctionalTest extends DevToolsCommandFunctionalTestCas
         parent::setUp();
 
         $this->application->addCommands(array(
-            new RefreshTransCommand(),
-            new TranslationUpdateCommand(),
+            new GenerateEntitiesDoctrineCommand(),
+            new EntitiesRefreshCommand(),
         ));
 
-        $this->configureCommand('d:trans:refresh');
+        $this->configureCommand('d:ent:refresh');
     }
 
     /**
@@ -32,21 +32,21 @@ class RefreshTransCommandFunctionalTest extends DevToolsCommandFunctionalTestCas
     }
 
     /**
-     * Verify that the translations are refreshed.
+     * Verify that the entities are refreshed.
      */
     public function testExecute()
     {
         $this->tester->execute(array(
-            '--env' => 'test_dev',
+            '--env' => 'dev',
         ));
 
         $display = $this->tester->getDisplay();
 
-        $this->assertContains('Generating "en" translation files for "DevToolsBundle"', $display);
+        $this->assertContains('Generating entities for bundle "GHTDevToolsBundle"', $display);
     }
 
     /**
-     * Verify that no translations are refreshed if not running on a dev
+     * Verify that no entities are refreshed if not running on a dev
      * environment.
      */
     public function testExecuteWrongEnvironment()

@@ -49,26 +49,16 @@ class TransAddCommand extends DevToolsCommand
      */
     protected function configure()
     {
-        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_update.defaults');
-
         $this
             ->setName('d:trans:add')
             ->setDescription('Add one or more translations.')
-            ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.', $this->getContainer()->getParameter('d_tools.bundle'))
-            ->addOption('domain', 'd', InputOption::VALUE_REQUIRED, 'The translation domain', $this->defaults['domain'] ?? 'messages')
-            ->addOption('locale', 'l', InputOption::VALUE_REQUIRED, 'The translation locale', $this->defaults['locale'] ?? 'en')
-            ->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Should the translation refresh be run after adding new translations')
+            ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.')
+            ->addOption('domain', 'd', InputOption::VALUE_REQUIRED, 'The translation domain')
+            ->addOption('locale', 'l', InputOption::VALUE_REQUIRED, 'The translation locale')
             ->addOption('trans', 't', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'The translation token to add (trans-unit resname property and source value).  Set the target value at the same time by adding a ":" followed by the translation string.')
+            ->addOption('refresh', null, InputOption::VALUE_NONE, 'Should the translation refresh be run after adding new translations (if refresh is not configured by default)')
+            ->addOption('no-refresh', null, InputOption::VALUE_NONE, 'Suppress the auto translation refresh (if refresh is configured by default)')
         ;
-
-        // If refresh is not a default, allow it to be set
-        if (empty($this->defaults['refresh'])) {
-            $this->addOption('refresh', 'r', InputOption::VALUE_NONE, 'Should the translation refresh be run after adding new translations (refresh is not configured by default)');
-        }
-        // Otherwise, allow refresh to be suppressed
-        else {
-            $this->addOption('no_refresh', 'n', InputOption::VALUE_NONE, 'Suppress the auto translation refresh (refresh is configured by default)');
-        }
     }
 
     /**
@@ -112,8 +102,10 @@ class TransAddCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
+        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_add.defaults');
+
         // This command should only be run in a dev environment
-        if (strpos($this->environment, 'dev') === false) {
+        if (strpos($this->environment, 'dev') === false && strpos($this->environment, 'test') === false) {
             $this->error = "This command can only be run on a development environment!";
         }
 
@@ -124,7 +116,7 @@ class TransAddCommand extends DevToolsCommand
         $this->fileFormat = $options['file_format'];
         $this->locale = $options['locale'];
         $this->refresh = $options['refresh'];
-        $this->translations = $options['trans'];
+        $this->translations = $this->input->getOption('trans');
 
         // For now, only XLF is supported
         if ($this->fileFormat !== 'xlf') {
@@ -142,11 +134,7 @@ class TransAddCommand extends DevToolsCommand
     {
         // Get the translation file names for the target bundle
         $directory = $this->getContainer()->get('file_locator')->locate(
-            sprintf(
-                '@%s%s/Resources/translations',
-                $this->bundle,
-                strpos($this->environment, 'test') !== false ? '/Tests' : ''
-            )
+            sprintf('%s/Resources/translations', $this->bundle)
         );
         $fileNames = $this->scanDir($directory);
         $targetFileName = sprintf('%s.%s.%s', $this->domain, $this->locale, $this->fileFormat);
@@ -302,14 +290,13 @@ class TransAddCommand extends DevToolsCommand
     protected function resolveOptions(): array
     {
         return array(
-            'bundle' => $this->input->getArgument('bundle'),
-            'domain' => $this->input->getOption('domain'),
+            'bundle' => $this->input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle'),
+            'domain' => $this->input->getOption('domain') ?? $this->defaults['domain'],
             'file_format' => strtolower($this->defaults['file_format']),
-            'locale' => $this->input->getOption('locale'),
+            'locale' => $this->input->getOption('locale') ?? $this->defaults['locale'],
             'refresh' => $this->input->getOption('refresh')
                 ? true
-                : ($this->input->getOption('no_refresh') ? false : $this->defaults['refresh']),
-            'trans' => $this->input->getOption('trans'),
+                : ($this->input->getOption('no-refresh') ? false : $this->defaults['refresh']),
         );
     }
 

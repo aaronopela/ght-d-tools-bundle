@@ -2,11 +2,12 @@
 
 namespace GHT\DevToolsBundle\Tests;
 
+use GHT\DevToolsBundle\Fixtures\DBAL\DatabasePrimer;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class DevToolsCommandFunctionalTestCase extends KernelTestCase
+abstract class DevToolsCommandFunctionalTestCase extends KernelTestCase
 {
     /**
      * @var \Symfony\Bundle\FrameworkBundle\Console\Application
@@ -39,6 +40,8 @@ class DevToolsCommandFunctionalTestCase extends KernelTestCase
         ) {
             $this->container = $kernel->getContainer();
         }
+
+        DatabasePrimer::prime($kernel);
     }
 
     /**

@@ -24,32 +24,17 @@ class TransRefreshCommand extends DevToolsCommand
      */
     protected function configure()
     {
-        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_update.defaults');
-
         $this
             ->setName('d:trans:refresh')
             ->setDescription('Refresh the bundle translations.')
-            ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.', $this->getContainer()->getParameter('d_tools.bundle'))
-            ->addOption('domain', null, InputOption::VALUE_REQUIRED, 'Specify the domain to update', $this->defaults['domain'] ?? : null)
+            ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.')
+            ->addOption('domain', null, InputOption::VALUE_REQUIRED, 'Specify the domain to update')
+            ->addOption('locale', 'l', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'One or more locales, all configured locales by default')
+            ->addOption('force', null, InputOption::VALUE_NONE, 'Should the update be done (if configured default is to dump the messages in the console)')
+            ->addOption('dump', null, InputOption::VALUE_NONE, 'Should the messages be dumped in the console (if configured default is to force the update)')
+            ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files (if backup is configured default)')
+            ->addOption('force-backup', null, InputOption::VALUE_NONE, 'Force backup of existing entities files (if backup is not configured by default)')
         ;
-
-        // If default mode is dump, allow the force
-        if ($this->defaults['mode'] === 'dump') {
-            $this->addOption('force', 'f', InputOption::VALUE_NONE, 'Should the update be done (configured default is to dump the messages in the console)');
-        }
-        // Otherwise, the messages to be dumped
-        else {
-            $this->addOption('dump', 'd', InputOption::VALUE_NONE, 'Should the messages be dumped in the console (configured default is to force the update)');
-        }
-
-        // If no_backup is not a default, allow it to be set
-        if (empty($this->defaults['no_backup'])) {
-            $this->addOption('no_backup', 'n', InputOption::VALUE_NONE, 'Do not backup existing entities files (backup is configured default)');
-        }
-        // Otherwise, allow a backup to be forced
-        else {
-            $this->addOption('force_backup', 'f', InputOption::VALUE_NONE, 'Force backup of existing entities files (backup is not configured by default)');
-        }
     }
 
     /**
@@ -86,10 +71,17 @@ class TransRefreshCommand extends DevToolsCommand
     protected function cleanXml(): int
     {
         // Get the translation file names for the target bundle
-        $directory = sprintf('src/%s/Resources/translations', $this->bundle);
+        $directory = $this->getContainer()->get('file_locator')->locate(
+            sprintf('%s/Resources/translations', $this->bundle)
+        );
         $fileNames = $this->scanDir($directory);
 
         foreach ($fileNames as $fileName) {
+
+            if (preg_match('/~$/', $fileName)) {
+                continue 1;
+            }
+
             $this->output->writeln(sprintf('Cleaning up <info>%s</info>...', $fileName));
 
             // Load the XML
@@ -206,12 +198,14 @@ class TransRefreshCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
+        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_update.defaults');
+
         // This command should only be run in a dev environment
         if (strpos($this->environment, 'dev') === false) {
             $this->error = "This command can only be run on a development environment!";
         }
 
-        $this->bundle = $input->getArgument('bundle');
+        $this->bundle = $input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle');
     }
 
     /**
@@ -223,14 +217,16 @@ class TransRefreshCommand extends DevToolsCommand
     {
         return array(
             'clean' => $this->defaults['clean'],
-            'domain' => $this->input->getOption('domain'),
-            'locales' => $this->input->getOption('locales'),
+            'domain' => $this->input->getOption('domain') ?? $this->defaults['domain'],
+            'locales' => $this->input->getOption('locale')
+                ? $this->input->getOption('locale')
+                : $this->defaults['locales'],
             'mode' => $this->input->getOption('dump')
                 ? 'dump-messages'
                 : ($this->input->getOption('force') ? 'force' : $this->defaults['mode']),
-            'no_backup' => $this->input->getOption('no_backup')
+            'no_backup' => $this->input->getOption('no-backup')
                 ? true
-                : ($this->input->getOption('force_backup') ? false : $this->defaults['no_backup']),
+                : ($this->input->getOption('force-backup') ? false : $this->defaults['no_backup']),
             'no_prefix' => $this->defaults['no_prefix'],
             'output_format' => $this->defaults['output_format'],
             'prefix' => $this->defaults['prefix'],
@@ -249,7 +245,7 @@ class TransRefreshCommand extends DevToolsCommand
         // Get the command
         $refresh = $this->getApplication()->find('translation:update');
 
-        foreach ($locales as $locale) {
+        foreach ($options['locales'] as $locale) {
 
             // Configure the command
             $refreshArgs = array(
@@ -268,11 +264,11 @@ class TransRefreshCommand extends DevToolsCommand
                 $refreshArgs['--no-prefix'] = true;
             }
             elseif ($options['prefix']) {
-                $refreshArgs['prefix'] = $options['prefix'];
+                $refreshArgs['--prefix'] = $options['prefix'];
             }
 
             if ($options['domain']) {
-                $refreshArgs['domain'] = $options['domain'];
+                $refreshArgs['--domain'] = $options['domain'];
             }
 
             if ($options['clean']) {

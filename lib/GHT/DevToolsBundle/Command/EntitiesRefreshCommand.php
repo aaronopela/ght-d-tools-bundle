@@ -5,6 +5,7 @@ use GHT\DevToolsBundle\Command\DevToolsCommand;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -17,22 +18,13 @@ class EntitiesRefreshCommand extends DevToolsCommand
      */
     protected function configure()
     {
-        $this->defaults = $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults');
-
         $this
             ->setName('d:ent:refresh')
             ->setDescription('Refresh the Doctrine entities with preset configurations.')
-            ->addArgument('name', InputArgument::OPTIONAL, 'A bundle name, a namespace, or a class name', $this->getContainer()->getParameter('d_tools.bundle'))
+            ->addArgument('name', InputArgument::OPTIONAL, 'A bundle name, a namespace, or a class name')
+            ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files (if backup is configured default)')
+            ->addOption('force-backup', null, InputOption::VALUE_NONE, 'Force backup of existing entities files (if backup is not configured by default)')
         ;
-
-        // If no_backup is not a default, allow it to be set
-        if (empty($this->defaults['no_backup'])) {
-            $this->addOption('no_backup', 'n', InputOption::VALUE_NONE, 'Do not backup existing entities files (backup is configured default)');
-        }
-        // Otherwise, allow a backup to be forced
-        else {
-            $this->addOption('force_backup', 'f', InputOption::VALUE_NONE, 'Force backup of existing entities files (backup is not configured by default)');
-        }
     }
 
     /**
@@ -72,6 +64,8 @@ class EntitiesRefreshCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
+        $this->defaults = $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults');
+
         // This command should only be run in a dev environment
         if (strpos($this->environment, 'dev') === false) {
             $this->error = "This command can only be run on a development environment!";
@@ -86,10 +80,10 @@ class EntitiesRefreshCommand extends DevToolsCommand
     protected function resolveOptions(): array
     {
         return array(
-            'name' => $this->input->getArgument('name'),
-            'no_backup' => $this->input->getOption('no_backup')
+            'name' => $this->input->getArgument('name') ?? $this->getContainer()->getParameter('d_tools.bundle'),
+            'no_backup' => $this->input->getOption('no-backup')
                 ? true
-                : ($this->getOption('force_backup') ? false : $this->defaults['no_backup']),
+                : ($this->input->getOption('force-backup') ? false : $this->defaults['no_backup']),
         );
     }
 }

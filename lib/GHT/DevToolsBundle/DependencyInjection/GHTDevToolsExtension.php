@@ -20,19 +20,8 @@ class GHTDevToolsExtension extends Extension
      */
     public function load(array $configs, ContainerBuilder $container)
     {
-        $loader = new Loader\YamlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config/'));
-
-        // Load preset configs and merge with incoming configs
-        $path = $loader->getLocator()->locate('config.yml');
-        $container->addResource(new FileResource($path));
-
-        $yamlParser = new YamlParser();
-        $content = $yamlParser->parse(file_get_contents($path));
-        $configs = array_merge($content, $configs);
-
+        // Process the configs
         $configuration = new Configuration();
-
-        // Process the merged configs
         $config = $this->processConfiguration($configuration, $configs);
 
         // Set the parameters for this extension recursively in the container
@@ -42,9 +31,6 @@ class GHTDevToolsExtension extends Extension
             array($this, 'setParameters'),
             array('parentKey' => $this->getAlias(), 'container' => $container)
         );
-
-        // Load services
-        $loader->load('services.yml');
     }
 
     /**

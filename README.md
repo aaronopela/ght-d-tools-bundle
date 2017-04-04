@@ -1,11 +1,7 @@
-GHT D Tools Bundle
+GHT D-Tools Bundle
 =========================
 
 This bundle simplifies the running of common Symfony development commands using configurations for default options, and adds some other useful options and features.
-
-# Warning
-
-This bundle was compiled from some project-specific commands in another bundle.  It isn't currently working, there may be glaringly obvious bugs that aren't so glaringly obvious at 2am, the configurations are new and unproven, and there are missing tests.  It's being made public at this point only for collaboration purposes.
 
 # Installation
 
@@ -80,7 +76,7 @@ d_tools:
             domain: ~
 
     # The d:trans:add command
-    d_trans_add:
+    translation_add:
         defaults:
             # The translation domain
             domain: 'messages'
@@ -121,7 +117,7 @@ bin/console d:trans:add -t trans.one:One -t trans.two:Two\ words -t "trans.three
 
 If the refresh is not configured as a default, translations for multiple languages can be added before the refresh happens.
 ```
-bin/console d:trans:add -t trans.one:Hola -l es
-bin/console d:trans:add -t trans.one:Shalom -l he
-bin/console d:trans:add -t trans.one:Hello -r
+bin/console d:trans:add -t trans.hello:Hola -l es
+bin/console d:trans:add -t trans.hello:Shalom -l he
+bin/console d:trans:add -t trans.hello:Hello -r
 ```

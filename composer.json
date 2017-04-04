@@ -1,10 +1,13 @@
 {
     "name": "greenhollowtech/ght-d-tools-bundle",
-    "description": "GHT D Tools Bundle",
+    "description": "GHT D-Tools Bundle",
     "homepage": "https://bitbucket.org/greenhollowtech/ght-d-tools-bundle",
     "license": "Beerware",
     "keywords": ["php", "development", "tools", "utility", "commands", "symfony", "bundle"],
     "require": {
+        "doctrine/doctrine-bundle": "~1.5",
+        "doctrine/orm": "~2.5",
+        "ext-xml": "*",
         "php": ">=7.0",
         "symfony/config": "~3.0",
         "symfony/dependency-injection": "~3.0",
@@ -13,6 +16,7 @@
     },
     "require-dev": {
         "eo/symfony-test-edition": "dev-master",
+        "ext-sqlite3": "*",
         "matthiasnoback/symfony-dependency-injection-test": "~1.0",
         "phpunit/phpunit": "~5.4",
         "symfony/var-dumper": "~3.0"
@@ -21,6 +25,11 @@
     "autoload": {
         "psr-0": {
             "GHT\\DevToolsBundle\\": "lib/"
+        }
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "GHT\\DevToolsBundle\\Tests\\": "tests/"
         }
     }
 }

@@ -1,18 +1,18 @@
 <?php
 
-use Symfony\Component\Config\Loader\LoaderInterface;
-
 $loader = require (__DIR__ . '/../vendor/autoload.php');
 
-$loader->add('GHT\DevToolsBundle\Fixtures', __DIR__);
+$loader->add('GHT\\DevToolsBundle\\Fixtures', __DIR__);
 
-function registerContainerConfiguration(LoaderInterface $loader)
+function registerContainerConfiguration($loader)
 {
-    $loader->load(__DIR__ . '/Fixtures/config/config.yml');
+    $loader->load(__DIR__ . '/GHT/DevToolsBundle/Fixtures/Resources/config/config_test.yml');
 }
 
-function registerBundles() {
+function registerBundles()
+{
     return array(
+        new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
         new GHT\DevToolsBundle\GHTDevToolsBundle(),
     );
 }

@@ -1,0 +1,28 @@
+d_tools:
+    bundle: 'GHTDevToolsBundle'
+    doctrine_generate_entities:
+        defaults:
+            no_backup: true
+    translation_update:
+        defaults:
+            no_backup: true
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                charset:  UTF8
+                driver: pdo_sqlite
+                memory: true
+                path: ":memory:"
+    orm:
+        entity_managers:
+            default:
+                auto_mapping: true
+                mappings:
+                    DevToolsBundle:
+                        alias: 'DevTools'
+                        dir: '%kernel.root_dir%/../../../../tests/GHT/DevToolsBundle/Fixtures/Resources/config/doctrine'
+                        prefix: 'GHT\DevToolsBundle\Fixtures\Entity'
+                        type: xml
+                        is_bundle: false
