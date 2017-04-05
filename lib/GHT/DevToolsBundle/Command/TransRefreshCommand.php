@@ -38,7 +38,7 @@ class TransRefreshCommand extends DevToolsCommand
             ->setName('d:trans:refresh')
             ->setDescription('Refresh the bundle translations.')
             ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.')
-            ->addOption('domain', null, InputOption::VALUE_REQUIRED, 'Specify the domain to update')
+            ->addOption('domain', 'd', InputOption::VALUE_REQUIRED, 'Specify the domain to update')
             ->addOption('locale', 'l', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'One or more locales, all configured locales by default')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Should the update be done (if configured default is to dump the messages in the console)')
             ->addOption('dump', null, InputOption::VALUE_NONE, 'Should the messages be dumped in the console (if configured default is to force the update)')
@@ -87,9 +87,11 @@ class TransRefreshCommand extends DevToolsCommand
         ));
         $fileNames = $this->scanDir($directory);
 
+        $options = $this->resolveOptions();
+
         foreach ($fileNames as $fileName) {
 
-            if (preg_match('/~$/', $fileName)) {
+            if (preg_match('/~$/', $fileName) || !preg_match(sprintf('/^%s\./', $options['domain']), $fileName)) {
                 continue 1;
             }
 
@@ -154,6 +156,9 @@ class TransRefreshCommand extends DevToolsCommand
                 try {
                     // rewrite non-breaking space entities as UTF-8 character
                     $target = str_replace('&nbsp;', ' ', $target);
+
+                    // attempt to handle bare ampersands gracefully
+                    $target = preg_replace('/(\s)\&(\s)/', "$1&amp;$2", $target);
 
                     $newTransUnit->addChild('target', $target);
                 }
