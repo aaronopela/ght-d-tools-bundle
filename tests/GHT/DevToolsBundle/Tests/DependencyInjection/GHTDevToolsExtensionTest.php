@@ -59,6 +59,7 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
         ));
 
         $this->assertContainerBuilderHasParameter('d_tools.bundle', 'GHTDevToolsBundle');
+        $this->assertContainerBuilderHasParameter('d_tools.path', null);
 
         $this->assertContainerBuilderHasParameter(
             'd_tools.doctrine_generate_entities',
@@ -67,16 +68,31 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasParameter(
             'd_tools.translation_update',
-            array('defaults' => array(
-                'clean' => false,
-                'domain' => 'messages',
-                'locales' => array('en'),
-                'mode' => 'force',
-                'no_backup' => false,
-                'no_prefix' => false,
-                'output_format' => 'xlf',
-                'prefix' => '__',
-            ))
+            array(
+                'primary_locale' => null,
+                'defaults' => array(
+                    'clean' => false,
+                    'domain' => 'messages',
+                    'locales' => array('en'),
+                    'mode' => 'force',
+                    'no_backup' => false,
+                    'no_prefix' => false,
+                    'output_format' => 'xlf',
+                    'prefix' => '__',
+                ),
+            )
+        );
+
+        $this->assertContainerBuilderHasParameter(
+            'd_tools.translation_add',
+            array(
+                'defaults' => array(
+                    'domain' => 'messages',
+                    'locale' => 'en',
+                    'file_format' => 'xlf',
+                    'refresh' => false,
+                ),
+            )
         );
     }
 }

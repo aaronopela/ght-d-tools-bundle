@@ -20,6 +20,16 @@ class TransRefreshCommand extends DevToolsCommand
     protected $bundle;
 
     /**
+     * @var string
+     */
+    protected $path;
+
+    /**
+     * @var string
+     */
+    protected $primaryLocale;
+
+    /**
      * Configure the command.
      */
     protected function configure()
@@ -71,9 +81,10 @@ class TransRefreshCommand extends DevToolsCommand
     protected function cleanXml(): int
     {
         // Get the translation file names for the target bundle
-        $directory = $this->getContainer()->get('file_locator')->locate(
-            sprintf('%s/Resources/translations', $this->bundle)
-        );
+        $directory = $this->getContainer()->get('file_locator')->locate(sprintf(
+            '%s/Resources/translations',
+            $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
+        ));
         $fileNames = $this->scanDir($directory);
 
         foreach ($fileNames as $fileName) {
@@ -88,12 +99,19 @@ class TransRefreshCommand extends DevToolsCommand
             $xml = new \SimpleXMLElement(sprintf('%s/%s', $directory, $fileName), LIBXML_NOBLANKS, true);
 
             // Fix the file attributes
+            $fileNode = $xml->children()->file;
+            $sourceLanguage = $fileNode->attributes()['source-language'];
+            if ($this->primaryLocale && $sourceLanguage !== $this->primaryLocale) {
+                $sourceLanguage = $this->primaryLocale;
+                $fileNode->attributes()['source-language'] = $this->primaryLocale;
+            }
+
             $matches = array();
             preg_match('/\.([a-z]{2})\./', $fileName, $matches);
-            $originalName = preg_replace('/\.[a-z]{2}\./', '.en.', $fileName);
-            $fileNode = $xml->children()->file;
-            $fileNode->attributes()['original'] = $originalName;
-            $fileNode->attributes()['target-language'] = $matches[1];
+            $targetLanguage = $matches[1];
+
+            $fileNode->attributes()['original'] = preg_replace('/\.[a-z]{2}\./', sprintf('.%s.', $sourceLanguage), $fileName);
+            $fileNode->attributes()['target-language'] = $targetLanguage;
 
             // Collect all the tokens
             $transUnits = array();
@@ -109,6 +127,17 @@ class TransRefreshCommand extends DevToolsCommand
             ksort($transUnits, SORT_NATURAL);
 
             foreach ($transUnits as $resname => $transUnit) {
+
+                $target = (string) $transUnit->children()->target;
+
+                // if this is not yet translated, check if it should be ignored
+                if ($this->primaryLocale
+                    && $this->primaryLocale !== $targetLanguage
+                    && ($target === '' || substr($target, 0, 2) === '__')
+                ) {
+                    continue 1;
+                }
+
                 $newTransUnit = $bodyNode->addChild('trans-unit');
                 $newTransUnit->addAttribute('id', $transUnit->attributes()['id']);
                 $newTransUnit->addAttribute('resname', $resname);
@@ -119,14 +148,18 @@ class TransRefreshCommand extends DevToolsCommand
                 }
                 catch (\Exception $e) {
                     $this->output->writeln(sprintf('-- Bad source for trans-unit <info>%s</info>: <fg=red>%s</>', $resname, $source));
+                    $this->output->writeln(sprintf('-- (%s: <comment>%s</comment>)', get_class($e), $e->getMessage()));
                 }
 
                 try {
-                    $target = (string) $transUnit->children()->target;
+                    // rewrite non-breaking space entities as UTF-8 character
+                    $target = str_replace('&nbsp;', ' ', $target);
+
                     $newTransUnit->addChild('target', $target);
                 }
                 catch (\Exception $e) {
                     $this->output->writeln(sprintf('-- Bad target for trans-unit <info>%s</info>: <fg=red>%s</>', $resname, $target));
+                    $this->output->writeln(sprintf('-- (%s: <comment>%s</comment>)', get_class($e), $e->getMessage()));
                 }
             }
 
@@ -145,10 +178,12 @@ class TransRefreshCommand extends DevToolsCommand
             $helper = $this->getHelper('question');
 
             foreach ($targetNodes as $targetNode) {
+
+                $target = $targetNode->textContent;
+
                 if ($this->defaults['prefix'] && !$this->defaults['no_prefix']) {
                     // prompt for untranslated strings, default to the original
                     $regex = sprintf('/^%s(.*)/', $this->defaults['prefix']);
-                    $target = $targetNode->textContent;
                     $matches = array();
                     if (preg_match($regex, $target, $matches)) {
                         $question = new Question(sprintf('Translation (<comment>%s</comment>): ', $matches[1]), $target);
@@ -206,6 +241,9 @@ class TransRefreshCommand extends DevToolsCommand
         }
 
         $this->bundle = $input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle');
+        $this->path = $this->getContainer()->getParameter('d_tools.path');
+        $this->path = $this->path ? rtrim($this->path, '/') : null;
+        $this->primaryLocale = $this->getContainer()->getParameter('d_tools.translation_update.primary_locale');
     }
 
     /**

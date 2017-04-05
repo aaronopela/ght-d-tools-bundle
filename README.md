@@ -46,6 +46,7 @@ d_tools:
 d_tools:
     # The target bundle or directory
     bundle: ExampleBundle
+    path: The bundle path when it cannot be guessed (i.e. parent of the Resources directory)
 
     # The doctrine:generate:entities command, used by d:ent:refresh
     doctrine_generate_entities:
@@ -57,6 +58,8 @@ d_tools:
 
     # The translation:update command, used by d:trans:refresh and d:trans:add
     translation_update:
+        # If set, all other locales will not auto-generate new translation units
+        primary_locale: ~
         defaults:
             # All the locales to be updated at once
             locales: [ 'en' ]

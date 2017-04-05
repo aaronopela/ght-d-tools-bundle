@@ -6,6 +6,9 @@ use Doctrine\Bundle\DoctrineBundle\Command\GenerateEntitiesDoctrineCommand;
 use GHT\DevToolsBundle\Command\EntitiesRefreshCommand;
 use GHT\DevToolsBundle\Tests\DevToolsCommandFunctionalTestCase;
 
+/**
+ * Exercises the d:ent:refresh command.
+ */
 class EntitiesRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
 {
     /**

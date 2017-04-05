@@ -35,6 +35,11 @@ class TransAddCommand extends DevToolsCommand
     protected $locale;
 
     /**
+     * @var string
+     */
+    protected $path;
+
+    /**
      * @var boolean
      */
     protected $refresh;
@@ -118,6 +123,9 @@ class TransAddCommand extends DevToolsCommand
         $this->refresh = $options['refresh'];
         $this->translations = $this->input->getOption('trans');
 
+        $this->path = $this->getContainer()->getParameter('d_tools.path');
+        $this->path = $this->path ? rtrim($this->path, '/') : null;
+
         // For now, only XLF is supported
         if ($this->fileFormat !== 'xlf') {
             $this->error('This command currently only supports the <fg=black>XLF</> format.');
@@ -133,9 +141,10 @@ class TransAddCommand extends DevToolsCommand
     protected function insertTranslations(): int
     {
         // Get the translation file names for the target bundle
-        $directory = $this->getContainer()->get('file_locator')->locate(
-            sprintf('%s/Resources/translations', $this->bundle)
-        );
+        $directory = $this->getContainer()->get('file_locator')->locate(sprintf(
+            '%s/Resources/translations',
+            $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
+        ));
         $fileNames = $this->scanDir($directory);
         $targetFileName = sprintf('%s.%s.%s', $this->domain, $this->locale, $this->fileFormat);
 
@@ -312,8 +321,11 @@ class TransAddCommand extends DevToolsCommand
 
         $refreshArgs = array(
             'command' => 'd:trans:refresh',
-            '--bundle' => $this->bundle,
         );
+
+        if ($this->input->getArgument('bundle')) {
+            $refreshArgs['bundle'] = $this->bundle;
+        }
 
         $returnCode = $refresh->run(new ArrayInput($refreshArgs), $this->output);
 
