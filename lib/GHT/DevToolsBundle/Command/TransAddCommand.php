@@ -172,10 +172,40 @@ class TransAddCommand extends DevToolsCommand
             $xml = new \SimpleXMLElement($xmlString, LIBXML_NOBLANKS);
         }
 
+        // Collect all the existing translations
+        $existingTranslations = array();
+        foreach ($xml->children()->file->body->children() as $transUnit) {
+            $resname = $transUnit->attributes()['resname'];
+            $existingTranslations[(string) $resname] = $transUnit;
+        }
+
         // Add the translations to the body
         $bodyNode = $xml->children()->file->body;
 
         foreach ($this->translations as $token => $transText) {
+
+            // If the translation already exists, confirm replacing it
+            if (array_key_exists($token, $existingTranslations)) {
+                $helper = $this->getHelper('question');
+                $question = new ConfirmationQuestion(
+                    sprintf(
+                        "Translation \"<info>%s</info>\" already exists!\nExisting translation: <comment>%s</comment>\nNew translation: <fg=red>%s</>\nReplace? (no) ",
+                        $token,
+                        (string) $existingTranslations[$token]->children()->target,
+                        $transText
+                    ),
+                    false
+                );
+
+                if (!$helper->ask($this->input, $this->output, $question)) {
+                    continue 1;
+                }
+
+                // Remove the existing trans-unit node
+                $removeNode = dom_import_simplexml($existingTranslations[$token]);
+                $removeNode->parentNode->removeChild($removeNode);
+            }
+
             $newTransUnit = $bodyNode->addChild('trans-unit');
             $newTransUnit->addAttribute('id', $token);
             $newTransUnit->addAttribute('resname', $token);
@@ -321,6 +351,7 @@ class TransAddCommand extends DevToolsCommand
 
         $refreshArgs = array(
             'command' => 'd:trans:refresh',
+            '--domain' => $this->domain,
         );
 
         if ($this->input->getArgument('bundle')) {

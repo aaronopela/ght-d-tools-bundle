@@ -122,5 +122,5 @@ If the refresh is not configured as a default, translations for multiple languag
 ```
 bin/console d:trans:add -t trans.hello:Hola -l es
 bin/console d:trans:add -t trans.hello:Shalom -l he
-bin/console d:trans:add -t trans.hello:Hello -r
+bin/console d:trans:add -t trans.hello:Hello --refresh
 ```
