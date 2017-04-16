@@ -164,25 +164,7 @@ class TransRefreshCommand extends DevToolsCommand
                 }
 
                 try {
-                    if ($this->conversions['amp_as_char']) {
-                        // Rewrite ampersand entities as bare ampersand character
-                        $target = str_replace('&amp;', '&', $target);
-                    }
-                    elseif ($this->conversions['amp_as_entity']) {
-                        // Rewrite ampersands not in HTML entities as HTML entity
-                        $target = preg_replace('/\&([a-z]+;)/i', "~$1", $target);
-                        $target = str_replace('&', '&amp;', $target);
-                        $target = preg_replace('/~([a-z]+;)/i', "&$1", $target);
-                    }
-
-                    if ($this->conversions['nbsp_as_char']) {
-                        // Rewrite non-breaking space entities as UTF-8 character
-                        $target = str_replace('&nbsp;', ' ', $target);
-                    }
-                    elseif ($this->conversions['nbsp_as_entity']) {
-                        // Rewrite non-breaking space characters as HTML entity
-                        $target = str_replace(' ', '&nbsp;', $target);
-                    }
+                    $target = $this->convertCharacters($target);
 
                     $newTransUnit->appendChild($bodyDom->createElement('target'))
                         ->appendChild($bodyDom->createTextNode($target))
@@ -215,6 +197,7 @@ class TransRefreshCommand extends DevToolsCommand
                     if (preg_match($regex, $target, $matches)) {
                         $question = new Question(sprintf('Translation (<comment>%s</comment>): ', $matches[1]), $target);
                         $target = $helper->ask($this->input, $this->output, $question);
+                        $target = $this->convertCharacters($target);
                         $targetNode->textContent = $target;
                     }
                 }
@@ -247,6 +230,38 @@ class TransRefreshCommand extends DevToolsCommand
         }
 
         return 0;
+    }
+
+    /**
+     * Apply any configured character conversions.
+     *
+     * @param string $string The string with characters subject to conversion.
+     *
+     * @return string
+     */
+    protected function convertCharacters(string $string): string
+    {
+        if ($this->conversions['amp_as_char']) {
+            // Rewrite ampersand entities as bare ampersand character
+            $string = str_replace('&amp;', '&', $string);
+        }
+        elseif ($this->conversions['amp_as_entity']) {
+            // Rewrite ampersands not in HTML entities as HTML entity
+            $string = preg_replace('/\&([a-z]+;)/i', "~$1", $string);
+            $string = str_replace('&', '&amp;', $string);
+            $string = preg_replace('/~([a-z]+;)/i', "&$1", $string);
+        }
+
+        if ($this->conversions['nbsp_as_char']) {
+            // Rewrite non-breaking space entities as UTF-8 character
+            $string = str_replace('&nbsp;', ' ', $string);
+        }
+        elseif ($this->conversions['nbsp_as_entity']) {
+            // Rewrite non-breaking space characters as HTML entity
+            $string = str_replace(' ', '&nbsp;', $string);
+        }
+
+        return $string;
     }
 
     /**
