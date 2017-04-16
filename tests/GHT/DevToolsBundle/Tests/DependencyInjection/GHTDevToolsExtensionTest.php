@@ -70,6 +70,12 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
             'd_tools.translation_update',
             array(
                 'primary_locale' => null,
+                'conversions' => array(
+                    'amp_as_char' => false,
+                    'amp_as_entity' => false,
+                    'nbsp_as_char' => false,
+                    'nbsp_as_entity' => false,
+                ),
                 'defaults' => array(
                     'clean' => false,
                     'domain' => 'messages',

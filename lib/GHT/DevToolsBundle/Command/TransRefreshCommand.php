@@ -20,6 +20,11 @@ class TransRefreshCommand extends DevToolsCommand
     protected $bundle;
 
     /**
+     * @var array
+     */
+    protected $conversions;
+
+    /**
      * @var string
      */
     protected $path;
@@ -123,7 +128,8 @@ class TransRefreshCommand extends DevToolsCommand
             }
 
             // Reset the XML body
-            $bodyNode = new \SimpleXMLElement('<body></body>');
+            $bodyDom = new \DOMDocument('1.0');
+            $bodyNode = $bodyDom->appendChild($bodyDom->createElement('body'));
 
             // Add the trans-units back to the body in sorted order
             ksort($transUnits, SORT_NATURAL);
@@ -132,7 +138,7 @@ class TransRefreshCommand extends DevToolsCommand
 
                 $target = (string) $transUnit->children()->target;
 
-                // if this is not yet translated, check if it should be ignored
+                // If this is not yet translated, check if it should be ignored
                 if ($this->primaryLocale
                     && $this->primaryLocale !== $targetLanguage
                     && ($target === '' || substr($target, 0, 2) === '__')
@@ -140,13 +146,17 @@ class TransRefreshCommand extends DevToolsCommand
                     continue 1;
                 }
 
-                $newTransUnit = $bodyNode->addChild('trans-unit');
-                $newTransUnit->addAttribute('id', $transUnit->attributes()['id']);
-                $newTransUnit->addAttribute('resname', $resname);
+                $newTransUnit = $bodyNode->appendChild($bodyDom->createElement('trans-unit'));
+                $idAttribute = $bodyDom->createAttribute('id');
+                $idAttribute->value = $transUnit->attributes()['id'];
+                $resnameAttribute = $bodyDom->createAttribute('resname');
+                $resnameAttribute->value = $resname;
+                $newTransUnit->appendChild($idAttribute);
+                $newTransUnit->appendChild($resnameAttribute);
 
                 try {
                     $source = (string) $transUnit->children()->source;
-                    $newTransUnit->addChild('source', $source);
+                    $newTransUnit->appendChild($bodyDom->createElement('source', $source));
                 }
                 catch (\Exception $e) {
                     $this->output->writeln(sprintf('-- Bad source for trans-unit <info>%s</info>: <fg=red>%s</>', $resname, $source));
@@ -154,13 +164,29 @@ class TransRefreshCommand extends DevToolsCommand
                 }
 
                 try {
-                    // rewrite non-breaking space entities as UTF-8 character
-                    $target = str_replace('&nbsp;', ' ', $target);
+                    if ($this->conversions['amp_as_char']) {
+                        // Rewrite ampersand entities as bare ampersand character
+                        $target = str_replace('&amp;', '&', $target);
+                    }
+                    elseif ($this->conversions['amp_as_entity']) {
+                        // Rewrite ampersands not in HTML entities as HTML entity
+                        $target = preg_replace('/\&([a-z]+;)/i', "~$1", $target);
+                        $target = str_replace('&', '&amp;', $target);
+                        $target = preg_replace('/~([a-z]+;)/i', "&$1", $target);
+                    }
 
-                    // attempt to handle bare ampersands gracefully
-                    $target = preg_replace('/(\s)\&(\s)/', "$1&amp;$2", $target);
+                    if ($this->conversions['nbsp_as_char']) {
+                        // Rewrite non-breaking space entities as UTF-8 character
+                        $target = str_replace('&nbsp;', ' ', $target);
+                    }
+                    elseif ($this->conversions['nbsp_as_entity']) {
+                        // Rewrite non-breaking space characters as HTML entity
+                        $target = str_replace(' ', '&nbsp;', $target);
+                    }
 
-                    $newTransUnit->addChild('target', $target);
+                    $newTransUnit->appendChild($bodyDom->createElement('target'))
+                        ->appendChild($bodyDom->createTextNode($target))
+                    ;
                 }
                 catch (\Exception $e) {
                     $this->output->writeln(sprintf('-- Bad target for trans-unit <info>%s</info>: <fg=red>%s</>', $resname, $target));
@@ -174,10 +200,6 @@ class TransRefreshCommand extends DevToolsCommand
             $dom->formatOutput = true;
             $dom->loadXML($xml->asXML());
 
-            // Load the generated body XML into a DOM document
-            $bodyDom = new \DOMDocument('1.0');
-            $bodyDom->loadXML($bodyNode->asXML());
-
             // Process all the target nodes for any zapped CDATA wrapping
             $targetNodes = $bodyDom->getElementsByTagName('target');
             $helper = $this->getHelper('question');
@@ -187,7 +209,7 @@ class TransRefreshCommand extends DevToolsCommand
                 $target = $targetNode->textContent;
 
                 if ($this->defaults['prefix'] && !$this->defaults['no_prefix']) {
-                    // prompt for untranslated strings, default to the original
+                    // Prompt for untranslated strings, default to the original
                     $regex = sprintf('/^%s(.*)/', $this->defaults['prefix']);
                     $matches = array();
                     if (preg_match($regex, $target, $matches)) {
@@ -197,11 +219,7 @@ class TransRefreshCommand extends DevToolsCommand
                     }
                 }
 
-                // decode and encode entities to catch any strays
-                $target = html_entity_decode($target);
-                $target = htmlspecialchars($target, ENT_NOQUOTES);
-
-                // if any entities, replace content with a child CDATA node
+                // If any ampersands, replace content with a child CDATA node
                 if (strpos($target, '&') !== false) {
                     $targetNode->textContent = '';
                     $cdata = $targetNode->ownerDocument->createCDataSection($target);
@@ -238,6 +256,7 @@ class TransRefreshCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
+        $this->conversions = $this->getContainer()->getParameter('d_tools.translation_update.conversions');
         $this->defaults = $this->getContainer()->getParameter('d_tools.translation_update.defaults');
 
         // This command should only be run in a dev environment

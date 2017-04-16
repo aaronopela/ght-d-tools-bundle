@@ -60,6 +60,16 @@ d_tools:
     translation_update:
         # If set, all other locales will not auto-generate new translation units
         primary_locale: ~
+        # If both types of a conversion are true, defaults to the "as_char" conversion and the "as_entity" conversion is ignored
+        conversions:
+            # Should ampersand HTML entities be converted to characters
+            amp_as_char: false
+            # Should bare ampersands be converted to HTML entities (ignores ampersands in HTML entities)
+            amp_as_entity: false
+            # Should non-breaking space HTML entities be converted to character
+            nbsp_as_char: false
+            # Should non-breaking space characters be converted to HTML entities
+            nbsp_as_entity: false
         defaults:
             # All the locales to be updated at once
             locales: [ 'en' ]
