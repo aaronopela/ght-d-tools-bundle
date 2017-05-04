@@ -73,6 +73,8 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
                 'conversions' => array(
                     'amp_as_char' => false,
                     'amp_as_entity' => false,
+                    'ltgt_as_char' => false,
+                    'ltgt_as_entity' => false,
                     'nbsp_as_char' => false,
                     'nbsp_as_entity' => false,
                 ),

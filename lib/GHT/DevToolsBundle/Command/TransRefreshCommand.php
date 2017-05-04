@@ -202,8 +202,9 @@ class TransRefreshCommand extends DevToolsCommand
                     }
                 }
 
-                // If any ampersands, replace content with a child CDATA node
-                if (strpos($target, '&') !== false) {
+                // If any ampersands or greater than / less than characters,
+                // replace content with a child CDATA node
+                if (strpos($target, '&') !== false || strpos($target, '<') !== false || strpos($target, '>') !== false) {
                     $targetNode->textContent = '';
                     $cdata = $targetNode->ownerDocument->createCDataSection($target);
                     $targetNode->appendChild($cdata);
@@ -250,6 +251,17 @@ class TransRefreshCommand extends DevToolsCommand
             $string = preg_replace('/\&([a-z]+;)/i', "~$1", $string);
             $string = str_replace('&', '&amp;', $string);
             $string = preg_replace('/~([a-z]+;)/i', "&$1", $string);
+        }
+
+        if ($this->conversions['ltgt_as_char']) {
+            // Rewrite less than / greater than entities as characters
+            $string = str_replace('&lt;', '<', $string);
+            $string = str_replace('&gt;', '>', $string);
+        }
+        elseif ($this->conversions['ltgt_as_entity']) {
+            // Rewrite less than / greater than characters as HTML entities
+            $string = str_replace('<', '&lt;', $string);
+            $string = str_replace('>', '&gt;', $string);
         }
 
         if ($this->conversions['nbsp_as_char']) {

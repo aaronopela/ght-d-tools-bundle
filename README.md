@@ -66,6 +66,10 @@ d_tools:
             amp_as_char: false
             # Should bare ampersands be converted to HTML entities (ignores ampersands in HTML entities)
             amp_as_entity: false
+            # Should less than / greater than HTML entities be converted to characters
+            ltgt_as_char: false
+            # Should less than / greater than characters be converted to HTML entities
+            ltgt_as_entity: false
             # Should non-breaking space HTML entities be converted to character
             nbsp_as_char: false
             # Should non-breaking space characters be converted to HTML entities
