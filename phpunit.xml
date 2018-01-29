@@ -5,10 +5,11 @@
     backupGlobals="false"
     colors="true"
     stopOnFailure="false"
-    bootstrap="tests/bootstrap.php"
+    bootstrap="vendor/autoload.php"
 >
     <php>
-        <server name="KERNEL_DIR" value="./vendor/eo/symfony-test-edition/app" />
+        <env name="KERNEL_CLASS" value="\GHT\DevToolsBundle\Tests\Kernel" />
+        <env name="APP_DEBUG" value="false" />
     </php>
 
     <testsuites>

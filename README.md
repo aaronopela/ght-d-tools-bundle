@@ -47,6 +47,7 @@ d_tools:
     # The target bundle or directory
     bundle: ExampleBundle
     path: The bundle path when it cannot be guessed (i.e. parent of the Resources directory)
+    translations_path: The translations path when it cannot be guessed (i.e. not in a Resources directory)
 
     # The doctrine:generate:entities command, used by d:ent:refresh
     doctrine_generate_entities:

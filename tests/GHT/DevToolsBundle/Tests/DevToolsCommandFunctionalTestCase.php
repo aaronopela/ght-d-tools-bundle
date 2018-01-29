@@ -2,7 +2,7 @@
 
 namespace GHT\DevToolsBundle\Tests;
 
-use GHT\DevToolsBundle\Fixtures\DBAL\DatabasePrimer;
+use GHT\DevToolsBundle\Tests\Fixtures\DBAL\DatabasePrimer;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;

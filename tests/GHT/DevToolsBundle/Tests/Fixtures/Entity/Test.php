@@ -1,6 +1,6 @@
 <?php
 
-namespace GHT\DevToolsBundle\Fixtures\Entity;
+namespace GHT\DevToolsBundle\Tests\Fixtures\Entity;
 
 class Test
 {

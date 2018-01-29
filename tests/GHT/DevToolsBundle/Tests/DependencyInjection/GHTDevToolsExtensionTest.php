@@ -60,6 +60,7 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasParameter('d_tools.bundle', 'GHTDevToolsBundle');
         $this->assertContainerBuilderHasParameter('d_tools.path', null);
+        $this->assertContainerBuilderHasParameter('d_tools.translations_path', null);
 
         $this->assertContainerBuilderHasParameter(
             'd_tools.doctrine_generate_entities',

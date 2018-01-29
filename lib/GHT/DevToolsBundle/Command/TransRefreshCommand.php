@@ -2,6 +2,8 @@
 namespace GHT\DevToolsBundle\Command;
 
 use GHT\DevToolsBundle\Command\DevToolsCommand;
+use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
+use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -25,6 +27,11 @@ class TransRefreshCommand extends DevToolsCommand
     protected $conversions;
 
     /**
+     * \Symfony\Component\Config\FileLocatorInterface
+     */
+    protected $fileLocator;
+
+    /**
      * @var string
      */
     protected $path;
@@ -35,16 +42,28 @@ class TransRefreshCommand extends DevToolsCommand
     protected $primaryLocale;
 
     /**
+     * The constructor.
+     *
+     * @param Symfony\Component\Config\FileLocatorInterface $fileLocator
+     */
+    public function __construct(FileLocatorInterface $fileLocator)
+    {
+        parent::__construct();
+
+        $this->fileLocator = $fileLocator;
+    }
+
+    /**
      * Configure the command.
      */
     protected function configure()
     {
         $this
-            ->setName('d:trans:refresh')
             ->setDescription('Refresh the bundle translations.')
             ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.')
             ->addOption('domain', 'd', InputOption::VALUE_REQUIRED, 'Specify the domain to update')
             ->addOption('locale', 'l', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'One or more locales, all configured locales by default')
+            ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'The translation files path')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Should the update be done (if configured default is to dump the messages in the console)')
             ->addOption('dump', null, InputOption::VALUE_NONE, 'Should the messages be dumped in the console (if configured default is to force the update)')
             ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files (if backup is configured default)')
@@ -86,10 +105,15 @@ class TransRefreshCommand extends DevToolsCommand
     protected function cleanXml(): int
     {
         // Get the translation file names for the target bundle
-        $directory = $this->getContainer()->get('file_locator')->locate(sprintf(
-            '%s/Resources/translations',
-            $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
-        ));
+        try {
+            $directory = $this->fileLocator->locate(sprintf(
+                '%s/Resources/translations',
+                $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
+            ));
+        }
+        catch (FileLocatorFileNotFoundException $e) {
+            $directory = $this->fileLocator->locate($this->input->getOption('path') ?? $this->path);
+        }
         $fileNames = $this->scanDir($directory);
 
         $options = $this->resolveOptions();
@@ -292,7 +316,9 @@ class TransRefreshCommand extends DevToolsCommand
         }
 
         $this->bundle = $input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle');
-        $this->path = $this->getContainer()->getParameter('d_tools.path');
+        $this->path = $this->getContainer()->getParameter('d_tools.translations_path')
+            ?? $this->getContainer()->getParameter('d_tools.path')
+        ;
         $this->path = $this->path ? rtrim($this->path, '/') : null;
         $this->primaryLocale = $this->getContainer()->getParameter('d_tools.translation_update.primary_locale');
     }

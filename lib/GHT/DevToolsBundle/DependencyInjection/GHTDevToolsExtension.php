@@ -24,6 +24,10 @@ class GHTDevToolsExtension extends Extension
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
+        // Load the commands as services
+        $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
+        $loader->load('services.xml');
+
         // Set the parameters for this extension recursively in the container
         $container->setParameter($this->getAlias(), $config);
         array_walk(

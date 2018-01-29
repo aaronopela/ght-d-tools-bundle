@@ -5,31 +5,31 @@
     "license": "Beerware",
     "keywords": ["php", "development", "tools", "utility", "commands", "symfony", "bundle"],
     "require": {
-        "doctrine/doctrine-bundle": "~1.5",
+        "doctrine/doctrine-bundle": "~1.8",
         "doctrine/orm": "~2.5",
         "ext-xml": "*",
-        "php": ">=7.0",
-        "symfony/config": "~3.0",
-        "symfony/dependency-injection": "~3.0",
-        "symfony/http-kernel": "~3.0",
-        "symfony/validator": "~3.0"
+        "php": ">=7.1",
+        "symfony/config": "~4.0",
+        "symfony/dependency-injection": "~4.0",
+        "symfony/http-kernel": "~4.0",
+        "symfony/validator": "~4.0"
     },
     "require-dev": {
-        "eo/symfony-test-edition": "dev-master",
         "ext-sqlite3": "*",
-        "matthiasnoback/symfony-dependency-injection-test": "~1.0",
-        "phpunit/phpunit": "~5.4",
-        "symfony/var-dumper": "~3.0"
+        "matthiasnoback/symfony-dependency-injection-test": "~2.3",
+        "phpunit/phpunit": "~6.5",
+        "symfony/symfony": "~4.0",
+        "symfony/var-dumper": "~4.0"
     },
     "type": "library",
     "autoload": {
-        "psr-0": {
-            "GHT\\DevToolsBundle\\": "lib/"
+        "psr-4": {
+            "GHT\\DevToolsBundle\\": "lib/GHT/DevToolsBundle"
         }
     },
     "autoload-dev": {
-        "psr-0": {
-            "GHT\\DevToolsBundle\\Tests\\": "tests/"
+        "psr-4": {
+            "GHT\\DevToolsBundle\\Tests\\": "tests/GHT/DevToolsBundle/Tests"
         }
     }
 }

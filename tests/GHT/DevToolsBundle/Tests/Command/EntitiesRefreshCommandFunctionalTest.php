@@ -20,7 +20,7 @@ class EntitiesRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTest
 
         $this->application->addCommands(array(
             new GenerateEntitiesDoctrineCommand(),
-            new EntitiesRefreshCommand(),
+            $this->container->get(EntitiesRefreshCommand::class),
         ));
 
         $this->configureCommand('d:ent:refresh');

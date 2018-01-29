@@ -1,0 +1,55 @@
+d_tools:
+    bundle: 'GHTDevToolsBundle'
+    doctrine_generate_entities:
+        defaults:
+            no_backup: true
+            path: ~
+    translation_update:
+        defaults:
+            no_backup: true
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                charset:  UTF8
+                driver: pdo_sqlite
+                memory: true
+                path: ":memory:"
+    orm:
+        entity_managers:
+            default:
+                auto_mapping: true
+                mappings:
+                    DevToolsBundle:
+                        alias: 'DevTools'
+                        dir: '%kernel.root_dir%/Fixtures/Resources/config/doctrine'
+                        prefix: 'GHT\DevToolsBundle\Tests\Fixtures\Entity'
+                        type: xml
+                        is_bundle: false
+framework:
+    secret: 'ght-d-tools-test-secret'
+    translator:
+        default_path: '%kernel.root_dir%/Fixtures/Resources/translations'
+services:
+    # Make the command services public for testing
+    GHT\DevToolsBundle\Command\EntitiesRefreshCommand:
+        public: true
+        alias: 'console.command.d_ent_refresh'
+    GHT\DevToolsBundle\Command\TransAddCommand:
+        public: true
+        alias: 'console.command.d_trans_add'
+    GHT\DevToolsBundle\Command\TransRefreshCommand:
+        public: true
+        alias: 'console.command.d_trans_refresh'
+    Symfony\Bundle\FrameworkBundle\Command\TranslationUpdateCommand:
+        public: true
+        arguments:
+            $writer: '@translation.writer'
+            $reader: '@translation.reader'
+            $extractor: '@translation.extractor'
+            $defaultLocale: '%kernel.default_locale%'
+            $defaultTransPath: '%translator.default_path%'
+            $defaultViewsPath: ~
+        tags:
+            - { name: console.command, command: translation:update }

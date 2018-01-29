@@ -34,15 +34,15 @@ class TransRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTestCas
         parent::setUp();
 
         $this->application->addCommands(array(
-            new TransRefreshCommand(),
-            new TranslationUpdateCommand(),
+            $this->container->get(TransRefreshCommand::class),
+            $this->container->get(TranslationUpdateCommand::class),
         ));
 
         $this->configureCommand('d:trans:refresh');
 
         // Override the default bundle path
-        $this->bundle = $this->container->get('kernel')->getRootDir() . '/../../../../tests/GHT/DevToolsBundle/Fixtures';
-        $this->messagesPathName = $this->bundle . '/Resources/translations/messages.en.xlf';
+        $this->bundle = $this->container->get('kernel')->getRootDir() . '/Fixtures';
+        $this->messagesPathName = sprintf('%s/messages.en.xlf', $this->container->getParameter('translator.default_path'));
 
         // File contents may be updated, so capture the original
         $this->originalContents = file_get_contents($this->messagesPathName);

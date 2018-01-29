@@ -1,6 +1,6 @@
 <?php
 
-namespace GHT\DevToolsBundle\Fixtures\DBAL;
+namespace GHT\DevToolsBundle\Tests\Fixtures\DBAL;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\SchemaTool;

@@ -2,6 +2,8 @@
 namespace GHT\DevToolsBundle\Command;
 
 use GHT\DevToolsBundle\Command\DevToolsCommand;
+use Symfony\Component\Config\Exception\FileLocatorFileNotFoundException;
+use Symfony\Component\Config\FileLocatorInterface;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -30,6 +32,11 @@ class TransAddCommand extends DevToolsCommand
     protected $fileFormat;
 
     /**
+     * \Symfony\Component\Config\FileLocatorInterface
+     */
+    protected $fileLocator;
+
+    /**
      * @var string
      */
     protected $locale;
@@ -50,16 +57,28 @@ class TransAddCommand extends DevToolsCommand
     protected $translations;
 
     /**
+     * The constructor.
+     *
+     * @param Symfony\Component\Config\FileLocatorInterface $fileLocator
+     */
+    public function __construct(FileLocatorInterface $fileLocator)
+    {
+        parent::__construct();
+
+        $this->fileLocator = $fileLocator;
+    }
+
+    /**
      * Configure the command.
      */
     protected function configure()
     {
         $this
-            ->setName('d:trans:add')
             ->setDescription('Add one or more translations.')
             ->addArgument('bundle', InputArgument::OPTIONAL, 'The target bundle.')
             ->addOption('domain', 'd', InputOption::VALUE_REQUIRED, 'The translation domain')
             ->addOption('locale', 'l', InputOption::VALUE_REQUIRED, 'The translation locale')
+            ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'The translation files path')
             ->addOption('trans', 't', InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'The translation token to add (trans-unit resname property and source value).  Set the target value at the same time by adding a ":" followed by the translation string.')
             ->addOption('refresh', null, InputOption::VALUE_NONE, 'Should the translation refresh be run after adding new translations (if refresh is not configured by default)')
             ->addOption('no-refresh', null, InputOption::VALUE_NONE, 'Suppress the auto translation refresh (if refresh is configured by default)')
@@ -123,7 +142,9 @@ class TransAddCommand extends DevToolsCommand
         $this->refresh = $options['refresh'];
         $this->translations = $this->input->getOption('trans');
 
-        $this->path = $this->getContainer()->getParameter('d_tools.path');
+        $this->path = $this->getContainer()->getParameter('d_tools.translations_path')
+            ?? $this->getContainer()->getParameter('d_tools.path')
+        ;
         $this->path = $this->path ? rtrim($this->path, '/') : null;
 
         // For now, only XLF is supported
@@ -141,10 +162,15 @@ class TransAddCommand extends DevToolsCommand
     protected function insertTranslations(): int
     {
         // Get the translation file names for the target bundle
-        $directory = $this->getContainer()->get('file_locator')->locate(sprintf(
-            '%s/Resources/translations',
-            $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
-        ));
+        try {
+            $directory = $this->fileLocator->locate(sprintf(
+                '%s/Resources/translations',
+                $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
+            ));
+        }
+        catch (FileLocatorFileNotFoundException $e) {
+            $directory = $this->fileLocator->locate($this->input->getOption('path') ?? $this->path);
+        }
         $fileNames = $this->scanDir($directory);
         $targetFileName = sprintf('%s.%s.%s', $this->domain, $this->locale, $this->fileFormat);
 

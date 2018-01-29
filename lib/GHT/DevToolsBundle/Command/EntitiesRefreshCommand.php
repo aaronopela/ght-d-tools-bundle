@@ -19,9 +19,9 @@ class EntitiesRefreshCommand extends DevToolsCommand
     protected function configure()
     {
         $this
-            ->setName('d:ent:refresh')
             ->setDescription('Refresh the Doctrine entities with preset configurations.')
             ->addArgument('name', InputArgument::OPTIONAL, 'A bundle name, a namespace, or a class name')
+            ->addOption('path', null, InputOption::VALUE_REQUIRED, 'The entities file path if the directory structure does not match the namespace.')
             ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files (if backup is configured default)')
             ->addOption('force-backup', null, InputOption::VALUE_NONE, 'Force backup of existing entities files (if backup is not configured by default)')
         ;
@@ -45,6 +45,10 @@ class EntitiesRefreshCommand extends DevToolsCommand
             'command' => 'doctrine:generate:entities',
             'name' => $options['name'],
         );
+
+        if ($options['path']) {
+            $refreshArgs['--path'] = $options['path'];
+        }
 
         if ($options['no_backup']) {
             $refreshArgs['--no-backup'] = true;
@@ -81,6 +85,7 @@ class EntitiesRefreshCommand extends DevToolsCommand
     {
         return array(
             'name' => $this->input->getArgument('name') ?? $this->getContainer()->getParameter('d_tools.bundle'),
+            'path' => $this->input->getOption('path') ?? $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults.path'),
             'no_backup' => $this->input->getOption('no-backup')
                 ? true
                 : ($this->input->getOption('force-backup') ? false : $this->defaults['no_backup']),
