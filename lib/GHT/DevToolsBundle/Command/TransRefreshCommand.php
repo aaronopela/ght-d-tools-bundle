@@ -368,8 +368,11 @@ class TransRefreshCommand extends DevToolsCommand
                 '--' . $options['mode'] => true,
                 '--output-format' => $options['output_format'],
                 'locale' => $locale,
-                'bundle' => $this->bundle,
             );
+
+            if ($this->input->getArgument('bundle') || ($this->bundle && !$this->path)) {
+                $refreshArgs['bundle'] = $this->input->getArgument('bundle') ?? $this->bundle;
+            }
 
             if ($options['no_backup']) {
                 $refreshArgs['--no-backup'] = true;

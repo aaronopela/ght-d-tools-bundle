@@ -8,11 +8,11 @@
         "doctrine/doctrine-bundle": "~1.8",
         "doctrine/orm": "~2.5",
         "ext-xml": "*",
-        "php": ">=7.1",
-        "symfony/config": "~4.0",
-        "symfony/dependency-injection": "~4.0",
-        "symfony/http-kernel": "~4.0",
-        "symfony/validator": "~4.0"
+        "php": ">=7.0",
+        "symfony/config": "^3.3 || ^4.0",
+        "symfony/dependency-injection": "^3.3 || ^4.0",
+        "symfony/http-kernel": "^3.3 || ^4.0",
+        "symfony/validator": "^3.3 || ^4.0"
     },
     "require-dev": {
         "ext-sqlite3": "*",

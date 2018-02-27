@@ -39,17 +39,6 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
     }
 
     /**
-     * Verify that the API method fails to load without minimum requirements.
-     */
-    public function testParametersContainApiMethodMapMissingRequiredConfigs()
-    {
-        $this->expectException(InvalidConfigurationException::class);
-        $this->expectExceptionMessage('The child node "bundle" at path "d_tools" must be configured.');
-
-        $this->load();
-    }
-
-    /**
      * Verify that the API method map is loaded.
      */
     public function testParametersContainApiMethodMapWithRequiredConfigs()
@@ -64,7 +53,11 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
 
         $this->assertContainerBuilderHasParameter(
             'd_tools.doctrine_generate_entities',
-            array('defaults' => array('no_backup' => false))
+            array('defaults' => array(
+                'namespace' => null,
+                'path' => null,
+                'no_backup' => false,
+            ))
         );
 
         $this->assertContainerBuilderHasParameter(

@@ -84,8 +84,11 @@ class EntitiesRefreshCommand extends DevToolsCommand
     protected function resolveOptions(): array
     {
         return array(
-            'name' => $this->input->getArgument('name') ?? $this->getContainer()->getParameter('d_tools.bundle'),
-            'path' => $this->input->getOption('path') ?? $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults.path'),
+            'name' => $this->input->getArgument('name')
+                ??  $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults.namespace')
+                ?? $this->getContainer()->getParameter('d_tools.bundle'),
+            'path' => $this->input->getOption('path')
+                ?? $this->getContainer()->getParameter('d_tools.doctrine_generate_entities.defaults.path'),
             'no_backup' => $this->input->getOption('no-backup')
                 ? true
                 : ($this->input->getOption('force-backup') ? false : $this->defaults['no_backup']),
