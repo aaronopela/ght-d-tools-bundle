@@ -3,15 +3,11 @@
 <container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="d_tools.entities_refresh_command.class">GHT\DevToolsBundle\Command\EntitiesRefreshCommand</parameter>
         <parameter key="d_tools.trans_add_command.class">GHT\DevToolsBundle\Command\TransAddCommand</parameter>
         <parameter key="d_tools.trans_refresh_command.class">GHT\DevToolsBundle\Command\TransRefreshCommand</parameter>
     </parameters>
 
     <services>
-        <service id="console.command.d_ent_refresh" class="%d_tools.entities_refresh_command.class%">
-            <tag name="console.command" command="d:ent:refresh" />
-        </service>
         <service id="console.command.d_trans_add" class="%d_tools.trans_add_command.class%">
             <argument type="service" id="file_locator" />
             <tag name="console.command" command="d:trans:add" />

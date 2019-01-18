@@ -13,7 +13,6 @@ class Kernel extends BaseKernel
     public function registerBundles()
     {
         $bundles = array(
-            new \Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new \GHT\DevToolsBundle\GHTDevToolsBundle(),
             new \Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
         );

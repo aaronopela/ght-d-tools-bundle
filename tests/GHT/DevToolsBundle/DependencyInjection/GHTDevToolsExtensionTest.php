@@ -52,15 +52,6 @@ class GHTDevToolsExtensionTest extends AbstractExtensionTestCase
         $this->assertContainerBuilderHasParameter('d_tools.translations_path', null);
 
         $this->assertContainerBuilderHasParameter(
-            'd_tools.doctrine_generate_entities',
-            array('defaults' => array(
-                'namespace' => null,
-                'path' => null,
-                'no_backup' => false,
-            ))
-        );
-
-        $this->assertContainerBuilderHasParameter(
             'd_tools.translation_update',
             array(
                 'primary_locale' => null,

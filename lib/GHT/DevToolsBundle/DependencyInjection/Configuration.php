@@ -15,8 +15,8 @@ class Configuration implements ConfigurationInterface
      */
     public function getConfigTreeBuilder()
     {
-        $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('d_tools');
+        $treeBuilder = new TreeBuilder('d_tools');
+        $rootNode = method_exists($treeBuilder, 'getRootNode') ? $treeBuilder->getRootNode() : $treeBuilder->root('d_tools');
 
         $rootNode
             ->addDefaultsIfNotSet()
@@ -32,29 +32,6 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('translations_path')
                     ->info('The translations path when it cannot be guessed (i.e. not in a Resources directory)')
                     ->defaultNull()
-                ->end()
-                ->arrayNode('doctrine_generate_entities')
-                    ->info('The doctrine:generate:entities command, used by d:ent:refresh')
-                    ->addDefaultsIfNotSet()
-                    ->children()
-                        ->arrayNode('defaults')
-                            ->addDefaultsIfNotSet()
-                            ->children()
-                                ->scalarNode('namespace')
-                                    ->info('The namespace when not in a bundle')
-                                    ->defaultNull()
-                                ->end()
-                                ->scalarNode('path')
-                                    ->info('The path where to generate entities when it cannot be guessed')
-                                    ->defaultNull()
-                                ->end()
-                                ->booleanNode('no_backup')
-                                    ->info('Do not backup existing entities files')
-                                    ->defaultFalse()
-                                ->end()
-                            ->end()
-                        ->end()
-                    ->end()
                 ->end()
                 ->arrayNode('translation_update')
                     ->info('The translation:update command, used by d:trans:refresh and d:trans:add')
