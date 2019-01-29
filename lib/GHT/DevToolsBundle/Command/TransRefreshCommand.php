@@ -27,6 +27,16 @@ class TransRefreshCommand extends DevToolsCommand
     protected $conversions;
 
     /**
+     * @var string
+     */
+    protected $defaultPath;
+
+    /**
+     * @var array
+     */
+    protected $defaults;
+
+    /**
      * \Symfony\Component\Config\FileLocatorInterface
      */
     protected $fileLocator;
@@ -45,12 +55,24 @@ class TransRefreshCommand extends DevToolsCommand
      * The constructor.
      *
      * @param Symfony\Component\Config\FileLocatorInterface $fileLocator
+     * @param array $defaults
+     * @param array $conversions
+     * @param string $primaryLocale
+     * @param string $bundle
+     * @param string $defaultPath
+     * @param string $path
      */
-    public function __construct(FileLocatorInterface $fileLocator)
+    public function __construct(FileLocatorInterface $fileLocator, array $defaults, array $conversions, string $primaryLocale = null, string $bundle = null, string $defaultPath = null, string $path = null)
     {
         parent::__construct();
 
         $this->fileLocator = $fileLocator;
+        $this->defaults = $defaults;
+        $this->conversions = $conversions;
+        $this->primaryLocale = $primaryLocale;
+        $this->bundle = $bundle;
+        $this->defaultPath = $defaultPath;
+        $this->path = $path;
     }
 
     /**
@@ -66,8 +88,6 @@ class TransRefreshCommand extends DevToolsCommand
             ->addOption('path', 'p', InputOption::VALUE_REQUIRED, 'The translation files path')
             ->addOption('force', null, InputOption::VALUE_NONE, 'Should the update be done (if configured default is to dump the messages in the console)')
             ->addOption('dump', null, InputOption::VALUE_NONE, 'Should the messages be dumped in the console (if configured default is to force the update)')
-            ->addOption('no-backup', null, InputOption::VALUE_NONE, 'Do not backup existing entities files (if backup is configured default)')
-            ->addOption('force-backup', null, InputOption::VALUE_NONE, 'Force backup of existing entities files (if backup is not configured by default)')
         ;
     }
 
@@ -307,20 +327,14 @@ class TransRefreshCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
-        $this->conversions = $this->getContainer()->getParameter('d_tools.translation_update.conversions');
-        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_update.defaults');
-
         // This command should only be run in a dev environment
         if (strpos($this->environment, 'dev') === false) {
             $this->error = "This command can only be run on a development environment!";
         }
 
-        $this->bundle = $input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle');
-        $this->path = $this->getContainer()->getParameter('d_tools.translations_path')
-            ?? $this->getContainer()->getParameter('d_tools.path')
-        ;
+        $this->bundle = $input->getArgument('bundle') ?? $this->bundle;
+        $this->path = $this->path ?? $this->defaultPath;
         $this->path = $this->path ? rtrim($this->path, '/') : null;
-        $this->primaryLocale = $this->getContainer()->getParameter('d_tools.translation_update.primary_locale');
     }
 
     /**
@@ -339,9 +353,6 @@ class TransRefreshCommand extends DevToolsCommand
             'mode' => $this->input->getOption('dump')
                 ? 'dump-messages'
                 : ($this->input->getOption('force') ? 'force' : $this->defaults['mode']),
-            'no_backup' => $this->input->getOption('no-backup')
-                ? true
-                : ($this->input->getOption('force-backup') ? false : $this->defaults['no_backup']),
             'no_prefix' => $this->defaults['no_prefix'],
             'output_format' => $this->defaults['output_format'],
             'prefix' => $this->defaults['prefix'],
@@ -372,10 +383,6 @@ class TransRefreshCommand extends DevToolsCommand
 
             if ($this->input->getArgument('bundle') || ($this->bundle && !$this->path)) {
                 $refreshArgs['bundle'] = $this->input->getArgument('bundle') ?? $this->bundle;
-            }
-
-            if ($options['no_backup']) {
-                $refreshArgs['--no-backup'] = true;
             }
 
             if ($options['no_prefix']) {

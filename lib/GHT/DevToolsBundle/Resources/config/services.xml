@@ -10,10 +10,21 @@
     <services>
         <service id="console.command.d_trans_add" class="%d_tools.trans_add_command.class%">
             <argument type="service" id="file_locator" />
+            <argument key="$defaults">%d_tools.translation_add.defaults%</argument>
+            <argument key="$prefix">%d_tools.translation_update.defaults.prefix%</argument>
+            <argument key="$bundle">%d_tools.bundle%</argument>
+            <argument key="$defaultPath">%d_tools.path%</argument>
+            <argument key="$path">%d_tools.translations_path%</argument>
             <tag name="console.command" command="d:trans:add" />
         </service>
         <service id="console.command.d_trans_refresh" class="%d_tools.trans_refresh_command.class%">
             <argument type="service" id="file_locator" />
+            <argument key="$defaults">%d_tools.translation_update.defaults%</argument>
+            <argument key="$conversions">%d_tools.translation_update.conversions%</argument>
+            <argument key="$primaryLocale">%d_tools.translation_update.primary_locale%</argument>
+            <argument key="$bundle">%d_tools.bundle%</argument>
+            <argument key="$defaultPath">%d_tools.path%</argument>
+            <argument key="$path">%d_tools.translations_path%</argument>
             <tag name="console.command" command="d:trans:refresh" />
         </service>
     </services>

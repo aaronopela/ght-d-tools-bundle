@@ -24,6 +24,16 @@ class TransAddCommand extends DevToolsCommand
     /**
      * @var string
      */
+    protected $defaultPath;
+
+    /**
+     * @var array
+     */
+    protected $defaults;
+
+    /**
+     * @var string
+     */
     protected $domain;
 
     /**
@@ -47,6 +57,11 @@ class TransAddCommand extends DevToolsCommand
     protected $path;
 
     /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
      * @var boolean
      */
     protected $refresh;
@@ -60,12 +75,22 @@ class TransAddCommand extends DevToolsCommand
      * The constructor.
      *
      * @param Symfony\Component\Config\FileLocatorInterface $fileLocator
+     * @param array $defaults
+     * @param string $prefix
+     * @param string $bundle
+     * @param string $defaultPath
+     * @param string $path
      */
-    public function __construct(FileLocatorInterface $fileLocator)
+    public function __construct(FileLocatorInterface $fileLocator, array $defaults, string $prefix, string $bundle = null, string $defaultPath = null, string $path = null)
     {
         parent::__construct();
 
         $this->fileLocator = $fileLocator;
+        $this->defaults = $defaults;
+        $this->prefix = $prefix;
+        $this->bundle = $bundle;
+        $this->defaultPath = $defaultPath;
+        $this->path = $path;
     }
 
     /**
@@ -126,8 +151,6 @@ class TransAddCommand extends DevToolsCommand
     {
         parent::init($input, $output);
 
-        $this->defaults = $this->getContainer()->getParameter('d_tools.translation_add.defaults');
-
         // This command should only be run in a dev environment
         if (strpos($this->environment, 'dev') === false && strpos($this->environment, 'test') === false) {
             $this->error = "This command can only be run on a development environment!";
@@ -142,9 +165,7 @@ class TransAddCommand extends DevToolsCommand
         $this->refresh = $options['refresh'];
         $this->translations = $this->input->getOption('trans');
 
-        $this->path = $this->getContainer()->getParameter('d_tools.translations_path')
-            ?? $this->getContainer()->getParameter('d_tools.path')
-        ;
+        $this->path = $this->path ?? $this->defaultPath;
         $this->path = $this->path ? rtrim($this->path, '/') : null;
 
         // For now, only XLF is supported
@@ -296,10 +317,9 @@ class TransAddCommand extends DevToolsCommand
     protected function processTranslations(): int
     {
         $processed = array();
-        $prefix = $this->getContainer()->getParameter('d_tools.translation_update.defaults.prefix');
 
         foreach ($this->translations as $translation) {
-            $transText = $prefix . $translation;
+            $transText = $this->prefix . $translation;
 
             if (strpos($translation, ':') !== false) {
                 $matches = array();
@@ -355,7 +375,7 @@ class TransAddCommand extends DevToolsCommand
     protected function resolveOptions(): array
     {
         return array(
-            'bundle' => $this->input->getArgument('bundle') ?? $this->getContainer()->getParameter('d_tools.bundle'),
+            'bundle' => $this->input->getArgument('bundle') ?? $this->bundle,
             'domain' => $this->input->getOption('domain') ?? $this->defaults['domain'],
             'file_format' => strtolower($this->defaults['file_format']),
             'locale' => $this->input->getOption('locale') ?? $this->defaults['locale'],

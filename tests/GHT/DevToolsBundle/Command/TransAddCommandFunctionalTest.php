@@ -41,7 +41,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
         $this->configureCommand('d:trans:add');
 
         // Override the default bundle path
-        $this->bundle = self::$container->get('kernel')->getRootDir() . '/Fixtures';
+        $this->bundle = self::$container->get('kernel')->getProjectDir() . '/tests/GHT/DevToolsBundle/Fixtures';
         $this->messagesPathName = sprintf('%s/messages.en.xlf', self::$container->getParameter('translator.default_path'));
 
         // File contents may be updated, so capture the original
