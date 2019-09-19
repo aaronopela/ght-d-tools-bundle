@@ -160,14 +160,15 @@ class TransRefreshCommand extends DevToolsCommand
             // Get the target language from the file name, considering possible
             // culture string
             $matches = array();
-            if (!preg_match('/\.([a-z]{2})_*[A-Z]{0,2}\./', $fileName, $matches)) {
+            if (!preg_match('/\.([a-z]{2})_*([A-Z]{0,2})\./', $fileName, $matches)) {
                 $this->output->writeln(sprintf('<fg=red>Could not detect language from file name "</>%s<fg=red>", skipping file!</>', $fileNode));
                 continue 1;
             }
             $targetLanguage = $matches[1];
+            $targetCulture = $matches[2] ?? '';
 
             $fileNode->attributes()['original'] = preg_replace('/\.[a-z]{2}_*[A-Z]{0,2}\./', sprintf('.%s.', $sourceLanguage), $fileName);
-            $fileNode->attributes()['target-language'] = $targetLanguage;
+            $fileNode->attributes()['target-language'] = $targetLanguage . ($targetCulture ? '-' . $targetCulture : '');
 
             // Collect all the tokens
             $transUnits = array();
@@ -189,7 +190,7 @@ class TransRefreshCommand extends DevToolsCommand
 
                 // If this is not yet translated, check if it should be ignored
                 if ($this->primaryLocale
-                    && $this->primaryLocale !== $targetLanguage
+                    && ($this->primaryLocale !== $targetLanguage || $targetCulture)
                     && ($target === '' || substr($target, 0, 2) === '__')
                 ) {
                     continue 1;
