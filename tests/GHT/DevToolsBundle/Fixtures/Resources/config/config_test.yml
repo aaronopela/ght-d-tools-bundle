@@ -6,7 +6,7 @@ d_tools:
 framework:
     secret: 'ght-d-tools-test-secret'
     translator:
-        default_path: '%kernel.root_dir%/Fixtures/Resources/translations'
+        default_path: '%kernel.project_dir%/tests/GHT/DevToolsBundle/Fixtures/Resources/translations'
 services:
     # Make the command services public for testing
     GHT\DevToolsBundle\Command\TransAddCommand:
