@@ -7,9 +7,15 @@ This bundle simplifies the running of common Symfony development commands using 
 
 ## Get the Composer package
 
-To install with [Composer](https://getcomposer.org/), run `composer require greenhollowtech/ght-d-tools-bundle`.
+### For Symfony 5 and Up
 
-## Add the GHTDevToolsBundle to your Symfony application
+Install with [Composer](https://getcomposer.org/) by running `composer require greenhollowtech/ght-d-tools-bundle`.
+
+### For Symfony 4 and Below
+
+Install d-tools version 2 with [Composer](https://getcomposer.org/) by running `composer require "greenhollowtech/ght-d-tools-bundle:2.*"`.
+
+## Add the GHTDevToolsBundle (if you have a Symfony 3 application)
 
 ```php
 // app/AppKernel.php
@@ -46,16 +52,8 @@ d_tools:
 d_tools:
     # The target bundle or directory
     bundle: ExampleBundle
-    path: The bundle path when it cannot be guessed (i.e. parent of the Resources directory)
-    translations_path: The translations path when it cannot be guessed (i.e. not in a Resources directory)
-
-    # The doctrine:generate:entities command, used by d:ent:refresh
-    doctrine_generate_entities:
-        defaults:
-            # The path where to generate entities when it cannot be guessed
-            path: ~
-            # Do not backup existing entities files
-            no_backup: false
+    path: The bundle path when it cannot be guessed from the bundle
+    translations_path: The translations path when it cannot be guessed from the path
 
     # The translation:update command, used by d:trans:refresh and d:trans:add
     translation_update:
@@ -107,12 +105,6 @@ d_tools:
 ```
 
 # Usage
-
-## Generate Entities
-
-```
-bin/console d:ent:refresh
-```
 
 ## Refresh Translations
 
