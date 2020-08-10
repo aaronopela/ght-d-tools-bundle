@@ -22,7 +22,7 @@ abstract class DevToolsCommandFunctionalTestCase extends KernelTestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         $kernel = $this->createKernel();
         $kernel->boot();
@@ -40,7 +40,7 @@ abstract class DevToolsCommandFunctionalTestCase extends KernelTestCase
     /**
      * {@inheritDoc}
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->tester);
         unset($this->application);

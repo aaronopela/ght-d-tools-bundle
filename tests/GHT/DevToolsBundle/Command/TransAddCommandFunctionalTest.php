@@ -29,7 +29,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
     /**
      * {@inheritDoc}
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
@@ -51,7 +51,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
     /**
      * {@inheritDoc}
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         // Restore the original file contents to the translation file
         file_put_contents($this->messagesPathName, $this->originalContents);
