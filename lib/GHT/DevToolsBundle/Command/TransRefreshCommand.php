@@ -324,36 +324,6 @@ class TransRefreshCommand extends DevToolsCommand
     }
 
     /**
-     * Attempt to find the translations directory.
-     */
-    protected function findTranslationsDir(string $baseDir = null): ?string
-    {
-        // attempt to find the translations directory in the given directory,
-        // set bundle, and set path
-        foreach ([$baseDir, $this->path, $this->bundle] as $dir) {
-
-            // if this directory is empty, move along
-            if (!$dir) {
-                continue 1;
-            }
-
-            // iterate over path guesses and return if found
-            foreach ([
-                sprintf('%s/translations', $dir),
-                sprintf('%s/Resources/translations', $dir),
-            ] as $translationDir) {
-
-                if (is_dir($translationDir)) {
-                    return $translationDir;
-                }
-            }
-        }
-
-        // return a null result
-        return null;
-    }
-
-    /**
      * {@inheritdoc}
      */
     protected function init(InputInterface $input, OutputInterface $output)

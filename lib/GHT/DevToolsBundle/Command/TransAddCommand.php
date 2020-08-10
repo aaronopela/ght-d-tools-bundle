@@ -184,10 +184,7 @@ class TransAddCommand extends DevToolsCommand
     {
         // Get the translation file names for the target bundle
         try {
-            $directory = $this->fileLocator->locate(sprintf(
-                '%s/Resources/translations',
-                $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
-            ));
+            $directory = $this->fileLocator->locate($this->findTranslationsDir($this->input->getArgument('bundle')));
         }
         catch (FileLocatorFileNotFoundException $e) {
             $directory = $this->fileLocator->locate($this->input->getOption('path') ?? $this->path);
