@@ -71,10 +71,10 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
 
         $updatedContents = file_get_contents($this->messagesPathName);
 
-        $this->assertContains('<trans-unit id="test.translation" resname="test.translation">', $updatedContents);
-        $this->assertContains('<source>test.translation</source>', $updatedContents);
-        $this->assertContains('<target>__test.translation</target>', $updatedContents);
-        $this->assertContains('</trans-unit>', $updatedContents);
+        $this->assertStringContainsString('<trans-unit id="test.translation" resname="test.translation">', $updatedContents);
+        $this->assertStringContainsString('<source>test.translation</source>', $updatedContents);
+        $this->assertStringContainsString('<target>__test.translation</target>', $updatedContents);
+        $this->assertStringContainsString('</trans-unit>', $updatedContents);
     }
 
     /**
@@ -89,7 +89,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
 
         $updatedContents = file_get_contents($this->messagesPathName);
 
-        $this->assertContains('<target>Test translation</target>', $updatedContents);
+        $this->assertStringContainsString('<target>Test translation</target>', $updatedContents);
     }
 
     /**
@@ -102,7 +102,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
             '--env' => 'dev',
         ));
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'Done!',
             $this->tester->getDisplay()
         );
@@ -119,7 +119,7 @@ class TransAddCommandFunctionalTest extends DevToolsCommandFunctionalTestCase
             '--env' => 'prod',
         ));
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'This command can only be run on a development environment!',
             $this->tester->getDisplay()
         );

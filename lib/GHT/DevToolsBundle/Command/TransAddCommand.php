@@ -141,7 +141,7 @@ class TransAddCommand extends DevToolsCommand
         }
 
         // End the command process
-        $this->end();
+        return $this->end();
     }
 
     /**

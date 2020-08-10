@@ -114,7 +114,7 @@ class TransRefreshCommand extends DevToolsCommand
         $this->returnCode = $this->cleanXml();
 
         // End the command process
-        $this->end();
+        return $this->end();
     }
 
     /**
@@ -126,10 +126,7 @@ class TransRefreshCommand extends DevToolsCommand
     {
         // Get the translation file names for the target bundle
         try {
-            $directory = $this->fileLocator->locate(sprintf(
-                '%s/Resources/translations',
-                $this->input->getArgument('bundle') ?? $this->path ?? $this->bundle
-            ));
+            $directory = $this->fileLocator->locate($this->findTranslationsDir($this->input->getArgument('bundle')));
         }
         catch (FileLocatorFileNotFoundException $e) {
             $directory = $this->fileLocator->locate($this->input->getOption('path') ?? $this->path);
@@ -327,6 +324,36 @@ class TransRefreshCommand extends DevToolsCommand
     }
 
     /**
+     * Attempt to find the translations directory.
+     */
+    protected function findTranslationsDir(string $baseDir = null): ?string
+    {
+        // attempt to find the translations directory in the given directory,
+        // set bundle, and set path
+        foreach ([$baseDir, $this->path, $this->bundle] as $dir) {
+
+            // if this directory is empty, move along
+            if (!$dir) {
+                continue 1;
+            }
+
+            // iterate over path guesses and return if found
+            foreach ([
+                sprintf('%s/translations', $dir),
+                sprintf('%s/Resources/translations', $dir),
+            ] as $translationDir) {
+
+                if (is_dir($translationDir)) {
+                    return $translationDir;
+                }
+            }
+        }
+
+        // return a null result
+        return null;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function init(InputInterface $input, OutputInterface $output)
@@ -388,7 +415,14 @@ class TransRefreshCommand extends DevToolsCommand
             );
 
             if ($this->input->getArgument('bundle') || ($this->bundle && !$this->path)) {
-                $refreshArgs['bundle'] = $this->input->getArgument('bundle') ?? $this->bundle;
+
+                // get the path of the bundle's translation directory
+                $translationDir = $this->findTranslationsDir($this->input->getArgument('bundle'));
+
+                // if found, set the bundle as the parent directory
+                if ($translationDir) {
+                    $refreshArgs['bundle'] = preg_replace('/\/translations$/', '', $translationDir);
+                }
             }
 
             if ($options['no_prefix']) {

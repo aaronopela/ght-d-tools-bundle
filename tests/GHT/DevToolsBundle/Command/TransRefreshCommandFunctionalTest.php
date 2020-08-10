@@ -71,11 +71,11 @@ class TransRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTestCas
 
         $display = $this->tester->getDisplay();
 
-        $this->assertContains('Generating "en" translation files for', $display);
+        $this->assertStringContainsString('Generating "en" translation files for', $display);
 
         // Verify that existing translation units were sorted
         $updatedContents = file_get_contents($this->messagesPathName);
-        $this->assertRegExp('/resname="test.existing".*resname="test.unsorted.existing"/s', $updatedContents);
+        $this->assertMatchesRegularExpression('/resname="test.existing".*resname="test.unsorted.existing"/s', $updatedContents);
     }
 
     /**
@@ -89,7 +89,7 @@ class TransRefreshCommandFunctionalTest extends DevToolsCommandFunctionalTestCas
             '--env' => 'prod',
         ));
 
-        $this->assertContains(
+        $this->assertStringContainsString(
             'This command can only be run on a development environment!',
             $this->tester->getDisplay()
         );

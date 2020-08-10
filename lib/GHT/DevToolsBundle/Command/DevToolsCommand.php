@@ -54,18 +54,20 @@ abstract class DevToolsCommand extends Command
     {
         // Check if errors occurred
         if ($this->returnCode) {
-            $this->output->writeln("<error>Process ended with error code: " . $this->returnCode . "</error>");
-        }
-        if ($this->error) {
-            $this->output->writeln("<error>" . $this->error . "</error>");
-        }
-        if ($this->returnCode || $this->error) {
-            $this->output->writeln("");
-            return;
+            $this->output->writeln(sprintf('<error>Process ended with error code: %s</error>', $this->returnCode));
         }
 
-        $this->output->writeln("<comment>Done!</comment>");
-        $this->output->writeln("");
+        if ($this->error) {
+            $this->output->writeln(sprintf('<error>%s</error>', $this->error));
+        }
+
+        if (!$this->returnCode && !$this->error) {
+            $this->output->writeln('<comment>Done!</comment>');
+        }
+
+        $this->output->writeln('');
+
+        return $this->returnCode ?? 0;
     }
 
     /**
