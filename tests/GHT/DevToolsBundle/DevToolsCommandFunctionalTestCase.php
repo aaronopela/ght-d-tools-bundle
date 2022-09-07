@@ -19,6 +19,8 @@ abstract class DevToolsCommandFunctionalTestCase extends KernelTestCase
      */
     protected $tester;
 
+    protected static $container;
+
     /**
      * {@inheritDoc}
      */

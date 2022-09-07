@@ -10,7 +10,7 @@ class Kernel extends BaseKernel
     /**
      * {@inheritdoc}
      */
-    public function registerBundles()
+    public function registerBundles(): array
     {
         $bundles = array(
             new \GHT\DevToolsBundle\GHTDevToolsBundle(),
@@ -31,7 +31,7 @@ class Kernel extends BaseKernel
     /**
      * {@inheritdoc}
      */
-    public function getCacheDir()
+    public function getCacheDir(): string
     {
         return sys_get_temp_dir() . '/ght-d-tools-test/cache';
     }
@@ -39,7 +39,7 @@ class Kernel extends BaseKernel
     /**
      * {@inheritdoc}
      */
-    public function getLogDir()
+    public function getLogDir(): string
     {
         return sys_get_temp_dir() . '/ght-d-tools-test/logs';
     }

@@ -380,7 +380,7 @@ class TransRefreshCommand extends DevToolsCommand
             $refreshArgs = array(
                 'command' => 'translation:update',
                 '--' . $options['mode'] => true,
-                '--output-format' => $options['output_format'],
+                '--format' => $options['output_format'],
                 'locale' => $locale,
             );
 
